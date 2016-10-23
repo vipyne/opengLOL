@@ -22,9 +22,13 @@ void main ()
 
   float len_dir_perpend = length(dir_perpendicular);
 
-  if (len_dir_perpend > radius) {
-    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-  } else {
+  float  edge = smoothstep(radius, radius - 0.02, len_dir_perpend);
+  // float  edge = smoothstep(radius, radius - 0.02, len_dir_perpend) - smoothstep(radius - 0.02, radius, len_dir_perpend) ;
+  // float edge = smoothstep(len_dir_perpend - 0.02, len_dir_perpend, radius) - smoothstep(len_dir_perpend, len_dir_perpend - 0.02, radius);
+
+  // if (len_dir_perpend > radius) {
+  //   gl_FragColor = edge * vec4(0.0, 0.0, 0.0, 1.0);
+  // } else {
     vec4 ambient_color = vec4(0.750, 0.750, 0.750, 1.0);
 
     float k = sqrt(radius * radius - len_dir_perpend * len_dir_perpend);
@@ -38,7 +42,8 @@ void main ()
     vec3 camera_light_dir = normalize(camera_pos - point1);
     float diffuse_k = dot(light_dir, normalized_point1);
 
-    gl_FragColor = diffuse_k * vec4(0.90, 0.690, 0.690, 1.0) + ambient_color;
-  }
+    // gl_FragColor = diffuse_k * vec4(0.90, 0.690, 0.690, 1.0) + ambient_color;
+    gl_FragColor = diffuse_k * edge * vec4(0.90, 0.690, 0.690, 1.0) + ambient_color;
+  // }
 
 }
