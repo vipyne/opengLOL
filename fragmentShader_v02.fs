@@ -10,6 +10,9 @@ void main ()
 {
   if (v_pos.x * v_pos.y > 0.0) {
     gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+    if (v_pos.x > 0.0 && v_pos.y > 0.0) {
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
   } else {
     gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
   }
