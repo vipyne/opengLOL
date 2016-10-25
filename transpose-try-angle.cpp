@@ -129,11 +129,14 @@ void vpInitCanvas()
   glViewport(0, 0, 1000, 1000);
   glClearColor(0.5, 0.2, 0.8, 1.0);
 
-	//glLoadMatrix(m_modelViewMatrix_ptr);
+  // GLfloat vertices[] = { -0.5f, -0.5f, -0.5f,
+  //                         0.5f, -0.5f, -0.5f,
+  //                         0.0f,  0.5f, -0.5f };   // array of vertices
 
   GLfloat vertices[] = { -0.5f, -0.5f, -0.5f,
                           0.5f, -0.5f, -0.5f,
-                          0.0f,  0.5f, -0.5f };   // array of vertices
+                          0.5f,  0.5f, -0.5f,
+                         -0.5f,  0.5f, -0.5f };   //
 
 	// Buffer Arrays - generate, bind, send data
   glGenBuffers(1, &vector_buffer_object_id); //passing in address of id so original value can be changed
@@ -166,7 +169,7 @@ void vpDraw ()
 
   glUniformMatrix4fv(m_matrixModelView_model, 1, GL_FALSE, m_modelViewMatrix_ptr);
 
-  glDrawArrays(GL_TRIANGLES, 0, 3);
+  glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
   glBindVertexArrayAPPLE(0); // unbinding?
   glFlush();
 
