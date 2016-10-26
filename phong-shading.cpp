@@ -196,7 +196,7 @@ int main (int argc, char *argv[])
 {
   std::cout << "^^^^ starting program..." << std::endl;
 
-  fragment_shader_source = loadFragmentShader("fragmentShader_v06.fs");
+  fragment_shader_source = loadFragmentShader("fragmentShader_v09.fs");
 
   // std::cout << "^^^^ fragment_shader_source" << fragment_shader_source << std::endl;
 
