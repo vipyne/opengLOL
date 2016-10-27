@@ -32,4 +32,4 @@
 .DS_Store
 
 # I'm silly
-./screenshots
+screenshots/*
