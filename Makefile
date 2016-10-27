@@ -13,17 +13,14 @@ run:
 	./triangle.exe
 
 derp:
-	$tri
-	run
+	$(tri)
+	$(run)
 
-asdf:
+triandrun:
 	g++ hello-core-profile-triangle.cpp -o triangle.exe -std=c++11 -framework OpenGL -framework GLUT -Wno-deprecated && ./triangle.exe
-
 
 phong:
 	g++ phong-shading.cpp -o phong.exe -std=c++11 -framework OpenGL -framework GLUT -Wno-deprecated
-
-
 
 spin:
 	g++ transpose-try-angle.cpp -o spin.exe -std=c++11 -framework OpenGL -framework GLUT -Wno-deprecated -framework CoreGraphics

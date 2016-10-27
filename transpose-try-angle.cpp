@@ -51,7 +51,7 @@ GLuint shaderProgram;
 GLuint vector_buffer_object_id; // initializing GLuint id
 GLuint vertex_array_object_id;
 float* mousePos_ptr;
-GLfloat m_modelViewMatrix[16] = { 1.0, 0.0, 0.0, 0.0,
+GLfloat m_modelViewMatrix[16] = { 1.0, 1.0, 0.0, 0.0,
                                   0.0, 1.0, 0.0, 0.0,
                                   0.0, 0.0, 1.0, 0.0,
                                   0.0, 0.0, 0.0, 1.0 };
@@ -61,11 +61,17 @@ GLuint pos_attr_location;
 GLuint m_matrixModelView_model;
 
 
+GLfloat vpAngleToRad(GLfloat angle)
+{
+  return (angle / 180.0f) * PI;
+}
+
 void getMousePosCallback(void) {
   CGEventRef event = CGEventCreate(NULL);
 	CGPoint cursor = CGEventGetLocation(event);
 
   GLfloat x = ((GLfloat) cursor.x) / 1000.0;
+  // std::cout << x << std::endl;
 
   m_modelViewMatrix[0] = x;
 }
@@ -133,10 +139,10 @@ void vpInitCanvas()
   //                         0.5f, -0.5f, -0.5f,
   //                         0.0f,  0.5f, -0.5f };   // array of vertices
 
-  GLfloat vertices[] = { -0.5f, -0.5f, -0.5f,
-                          0.5f, -0.5f, -0.5f,
-                          0.5f,  0.5f, -0.5f,
-                         -0.5f,  0.5f, -0.5f };   //
+  GLfloat vertices[] = { -0.25f, -0.25f, 0.0f,
+                          0.25f, -0.25f, 0.0f,
+                          0.25f,  0.25f, 0.0f,
+                         -0.25f,  0.25f, 0.0f };   //
 
 	// Buffer Arrays - generate, bind, send data
   glGenBuffers(1, &vector_buffer_object_id); //passing in address of id so original value can be changed
@@ -155,6 +161,14 @@ void vpDraw ()
   glClear(GL_COLOR_BUFFER_BIT);
 
   getMousePosCallback();
+
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity(); // doing matrix math
+  gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity(); // doing matrix math
+  glUseProgram(shaderProgram);
 
   glBindVertexArrayAPPLE(vertex_array_object_id);
 
