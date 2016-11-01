@@ -13,6 +13,7 @@
 #include <math.h>
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
+#include <ctime>
 #include "glint.h"
 
 using namespace std;
@@ -38,6 +39,9 @@ GLuint shaderProgram;
 GLuint vector_buffer_object_id; // initializing GLuint id
 string fragment_shader_source;
 GLuint vertex_array_object_id;
+GLfloat theta = 0;
+clock_t endTime;
+GLfloat radiansPerSecond = 180.0 / M_PI * 2.0;
 
 string loadFragmentShader (const char* filename)
 {
@@ -169,6 +173,18 @@ void vpInitCanvas()
   glBindVertexArrayAPPLE(vertex_array_object_id);
 }
 
+void vpTimer(int vp_time)
+{
+  clock_t startTime = clock();
+  GLfloat dt = (float)(clock() - endTime)/CLOCKS_PER_SEC;
+  theta += dt * radiansPerSecond;
+  std::cout << "^^^^ DT" << dt << std::endl;
+
+  endTime = startTime;
+  glutPostRedisplay();
+  glutTimerFunc(100, vpTimer, 0);
+}
+
 void vpDraw ()
 {
   glClear(GL_COLOR_BUFFER_BIT);
@@ -182,9 +198,12 @@ void vpDraw ()
   glUseProgram(shaderProgram);
 
   GLuint pos_attr_location = glGetAttribLocation(shaderProgram, "pos");
-
   glVertexAttribPointer(pos_attr_location, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid*)0);
   glEnableVertexAttribArray(pos_attr_location);
+
+  GLuint theta_u_location = glGetUniformLocation(shaderProgram, "theta");
+  glUniform1f(theta_u_location, theta);
+  std::cout << "^^^^ theta" << theta << std::endl;
 
   glBindVertexArrayAPPLE(vertex_array_object_id);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
@@ -196,10 +215,9 @@ int main (int argc, char *argv[])
 {
   std::cout << "^^^^ starting program..." << std::endl;
 
-  fragment_shader_source = loadFragmentShader("fragmentShader_v09.fs");
+  fragment_shader_source = loadFragmentShader("fragmentShader_v11.fs");
 
   // std::cout << "^^^^ fragment_shader_source" << fragment_shader_source << std::endl;
-
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGBA);
   glutInitWindowSize(720, 480);
@@ -207,6 +225,8 @@ int main (int argc, char *argv[])
   glutCreateWindow("phong phong phong phong phong");
   glutDisplayFunc(vpDraw);
   vpInitCanvas();
+  endTime = clock();
+  glutTimerFunc(100, vpTimer, 0);
   glutMainLoop();
 
 	return 0;
