@@ -23,6 +23,7 @@ using namespace std;
 // Vertex Shader
 //
 const char *vertex_shader_source =                "\n" \
+"#version 100                                      \n" \
 "attribute vec3 pos;                               \n" \
 "varying vec4 v_pos;                               \n" \
 "void main ()                                      \n" \
@@ -217,14 +218,19 @@ int main (int argc, char *argv[])
 
   fragment_shader_source = loadFragmentShader("fragmentShader_v11.fs");
 
+  // glut multisampling
+  //
+
   // std::cout << "^^^^ fragment_shader_source" << fragment_shader_source << std::endl;
   glutInit(&argc, argv);
-  glutInitDisplayMode(GLUT_RGBA);
+  glutInitDisplayMode(GLUT_RGBA | GLUT_3_2_CORE_PROFILE);
   glutInitWindowSize(720, 480);
   glutInitWindowPosition(50, 50);
   glutCreateWindow("phong phong phong phong phong");
   glutDisplayFunc(vpDraw);
   vpInitCanvas();
+  glEnable(GL_MULTISAMPLE_ARB);
+
   endTime = clock();
   glutTimerFunc(100, vpTimer, 0);
   glutMainLoop();

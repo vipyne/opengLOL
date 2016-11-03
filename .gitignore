@@ -30,3 +30,5 @@
 
 # macs are silly
 .DS_Store
+
+test-blah/*
