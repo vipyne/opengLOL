@@ -5,6 +5,9 @@
 
 varying vec4 v_pos;
 uniform float theta;
+uniform sampler1D sphere_info;
+uniform float num_of_spheres;
+uniform float size_of_texture;
 
 void planeIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 box_normal, in vec3 box_p1,
   out float plane_intersect)
@@ -116,31 +119,34 @@ void main ()
 {
   vec3 camera_pos = vec3(0.0, 0.0, 2.0);
 
-  struct Sphere {
-    float radius;
-    vec3 sphere_center;
-  };
-  Sphere list_of_spheres[2];
-  list_of_spheres[0].radius = 0.25;
-  list_of_spheres[0].sphere_center = vec3(2.0, 0, -2.0);
-  list_of_spheres[1].radius = 0.25;
-  list_of_spheres[1].sphere_center = vec3(-2.0, 0, -2.0);
-
   vec3 view_dir = v_pos.xyz - camera_pos;
   vec3 normalized_view_dir = normalize(view_dir);
 
   float t;
-  int sphere_inx = -1;
+  vec4 hit_sphere_pos_rad = vec4(0.0, 0.0, 0.0, 0.0);
+  vec4 hit_sphere_rgb = vec4(0.0, 1.0, 0.0, 0.0);
 
-  for (int i = 0; i < 2; ++i) {
-    sphereIntersection(camera_pos, normalized_view_dir, list_of_spheres[i].sphere_center, list_of_spheres[i].radius, t);
+  for (float i = 0.0; i < num_of_spheres; i += 1.0) {
+    float startIndex = i * 3.0;
+
+    float tex_coord_1 = (startIndex + 0.0)/size_of_texture + 1.0/(2.0 * size_of_texture);
+    float tex_coord_2 = (startIndex + 1.0)/size_of_texture + 1.0/(2.0 * size_of_texture);
+    float tex_coord_3 = (startIndex + 2.0)/size_of_texture + 1.0/(2.0 * size_of_texture);
+
+    vec4 pos_rad = texture1D(sphere_info, tex_coord_1);
+    vec4 vel = texture1D(sphere_info, tex_coord_2);
+    vec4 rgb = texture1D(sphere_info, tex_coord_3);
+
+    sphereIntersection(camera_pos, normalized_view_dir, pos_rad.xyz, pos_rad.w, t);
+
     if (t >= 0.0) {
-      sphere_inx = i;
+      hit_sphere_pos_rad = pos_rad;
+      hit_sphere_rgb = rgb;
       break;
     }
   }
 
-  if (sphere_inx < 0) {
+  if (t < 0.0) {
     vec4 color;
     computeColor(camera_pos, normalized_view_dir, color);
 
@@ -149,7 +155,7 @@ void main ()
     vec4 ambient_color = vec4(0.1750, 0.1750, 0.1750, 1.0);
 
     vec3 point1 = normalized_view_dir * t + camera_pos;
-    vec3 sphere_normal_p1 = normalize(point1 - list_of_spheres[sphere_inx].sphere_center); // sphere normal
+    vec3 sphere_normal_p1 = normalize(point1 - hit_sphere_pos_rad.xyz); // sphere normal
 
     // light
     vec3 light_pos = vec3(2.0, 2.0, 2.0);
@@ -176,17 +182,17 @@ void main ()
     float refraction_coef = 0.155;
     float Epsilon = 0.001;
     vec3 point2 = point1 + Epsilon * normalized_view_dir;
-    vec3 normal_at_point2 = normalize(point1 - list_of_spheres[sphere_inx].sphere_center);
+    vec3 normal_at_point2 = normalize(point1 - hit_sphere_pos_rad.xyz);
 
     vec3 point2_dir;
     refractionDirection(refraction_coef, normalized_view_dir, normal_at_point2, point2_dir); // first refraction
 
     float exit_t;
-    sphereIntersection(point2, normalize(point2_dir), list_of_spheres[sphere_inx].sphere_center, list_of_spheres[sphere_inx].radius, exit_t); // first sphere intersection
+    sphereIntersection(point2, normalize(point2_dir), hit_sphere_pos_rad.xyz, hit_sphere_pos_rad.w, exit_t); // first sphere intersection
 
     vec3 point3 = point2 + exit_t * point2_dir;
     vec3 normalized_point2_dir = normalize(point2_dir);
-    vec3 normal_at_point3 = normalize(point3 - list_of_spheres[sphere_inx].sphere_center);
+    vec3 normal_at_point3 = normalize(point3 - hit_sphere_pos_rad.xyz);
 
     vec3 point3_dir;
     refractionDirection( (1.0 / refraction_coef), normalized_point2_dir, normal_at_point3, point3_dir); // second refraction
@@ -194,7 +200,8 @@ void main ()
     vec4 refraction_color;
     computeColor(point3, normalize(point3_dir), refraction_color); // second sphere intersection
 
-    gl_FragColor = diffuse_k * vec4(0.36, 0.40, 0.650, 1.0) +specular_color + refraction_color;
+    gl_FragColor = diffuse_k * hit_sphere_rgb;
+    // gl_FragColor = diffuse_k * hit_sphere_rgb + specular_color + refraction_color;
     // gl_FragColor = diffuse_k * vec4(0.36, 0.40, 0.650, 1.0) + ambient_color + specular_color + relection + refraction_color;
   }
 

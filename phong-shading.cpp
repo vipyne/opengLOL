@@ -16,6 +16,8 @@
 #include <ctime>
 #include "glint.h"
 
+#define MAX_SPHERES 100
+
 using namespace std;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,6 +41,8 @@ GLuint shaderProgram;
 GLuint vector_buffer_object_id; // initializing GLuint id
 string fragment_shader_source;
 GLuint vertex_array_object_id;
+GLuint texture_id;
+GLuint size_of_texture;
 GLfloat theta = 0;
 clock_t endTime;
 GLfloat radiansPerSecond = 180.0 / M_PI * 2.0;
@@ -102,6 +106,52 @@ void getSquareVertices (GLfloat* vertices)
   vertices[11] = p4z;
 }
 
+void initSphere(float* data, int startIndex, float* pos, float radius, float* rgb)
+{
+  int i = startIndex * 3 * 4;
+
+  // pos
+  data[i + 0] = pos[0]; // x
+  data[i + 1] = pos[1]; // y
+  data[i + 2] = pos[2]; // z
+  data[i + 3] = radius; // radius
+  // velocity
+  data[i + 4] = 0.0; // v x
+  data[i + 5] = 1.0; // v y
+  data[i + 6] = 0.0; // v z
+  data[i + 7] = 1.0; // free for now
+  // color
+  data[i + 8] = rgb[0]; // r
+  data[i + 9] = rgb[1]; // g
+  data[i + 10] = rgb[2]; // b
+  data[i + 11] = 1.0; // free for now
+}
+
+void vpLoadTexture()
+{
+  int num_of_floats = MAX_SPHERES * 3 * 4;
+  GLfloat data[MAX_SPHERES * 3 * 4] = {0.0};
+
+  float p1[] = {2.0, 0.0, -2.0};
+  float color1[] = {1.0, 0.0, 0.0};
+  float p2[] = {-2.0, 0.0, -2.0};
+  float color2[] = {0.0, 0.0, 1.0};
+  // 2 spheres
+  initSphere(data, 0, p1, 0.25, color1);
+  initSphere(data, 1, p2, 0.25, color2);
+
+  glGenTextures(1, &texture_id);
+  glBindTexture(GL_TEXTURE_1D, texture_id);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+  size_of_texture = num_of_floats / 4.0;
+
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F_ARB, size_of_texture, 0, GL_RGBA, GL_FLOAT, data);
+}
+
 void vpInitCanvas()
 {
   glViewport(0, 0, 720, 480);
@@ -109,6 +159,8 @@ void vpInitCanvas()
 
   GLfloat vertices[12];
   getSquareVertices(vertices);
+
+  vpLoadTexture();
 
   // Buffer Arrays - generate, bind, send data
   glGenBuffers(1, &vector_buffer_object_id); //passing in address of id so original value can be changed
@@ -178,7 +230,6 @@ void vpTimer(int vp_time)
   clock_t startTime = clock();
   GLfloat dt = (float)(clock() - endTime)/CLOCKS_PER_SEC;
   theta += dt * radiansPerSecond;
-  std::cout << "^^^^ DT" << dt << std::endl;
 
   endTime = startTime;
   glutPostRedisplay();
@@ -203,7 +254,17 @@ void vpDraw ()
 
   GLuint theta_u_location = glGetUniformLocation(shaderProgram, "theta");
   glUniform1f(theta_u_location, theta);
-  std::cout << "^^^^ theta" << theta << std::endl;
+
+  GLuint size_texture_u_location = glGetUniformLocation(shaderProgram, "size_of_texture");
+  glUniform1f(size_texture_u_location, size_of_texture);
+
+  GLuint sphere_info_u_location = glGetUniformLocation(shaderProgram, "sphere_info");
+  GLuint num_spheres_u_location = glGetUniformLocation(shaderProgram, "num_of_spheres");
+  glUniform1f(num_spheres_u_location, 2);
+
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_1D, texture_id);
+  glUniform1i(sphere_info_u_location, 0);
 
   glBindVertexArrayAPPLE(vertex_array_object_id);
   glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
