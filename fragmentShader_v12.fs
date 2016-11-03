@@ -115,17 +115,32 @@ void animatePath(in float theta, out vec3 sphere_center)
 void main ()
 {
   vec3 camera_pos = vec3(0.0, 0.0, 2.0);
-  vec3 sphere_center;
-  animatePath(theta, sphere_center);
-  float radius = 1.0;
+
+  struct Sphere {
+    float radius;
+    vec3 sphere_center;
+  };
+  Sphere list_of_spheres[2];
+  list_of_spheres[0].radius = 0.25;
+  list_of_spheres[0].sphere_center = vec3(2.0, 0, -2.0);
+  list_of_spheres[1].radius = 0.25;
+  list_of_spheres[1].sphere_center = vec3(-2.0, 0, -2.0);
 
   vec3 view_dir = v_pos.xyz - camera_pos;
   vec3 normalized_view_dir = normalize(view_dir);
 
   float t;
-  sphereIntersection(camera_pos, normalized_view_dir, sphere_center, radius, t);
+  int sphere_inx = -1;
 
-  if (t < 0.0) {
+  for (int i = 0; i < 2; ++i) {
+    sphereIntersection(camera_pos, normalized_view_dir, list_of_spheres[i].sphere_center, list_of_spheres[i].radius, t);
+    if (t >= 0.0) {
+      sphere_inx = i;
+      break;
+    }
+  }
+
+  if (sphere_inx < 0) {
     vec4 color;
     computeColor(camera_pos, normalized_view_dir, color);
 
@@ -134,7 +149,7 @@ void main ()
     vec4 ambient_color = vec4(0.1750, 0.1750, 0.1750, 1.0);
 
     vec3 point1 = normalized_view_dir * t + camera_pos;
-    vec3 sphere_normal_p1 = normalize(point1 - sphere_center); // sphere normal
+    vec3 sphere_normal_p1 = normalize(point1 - list_of_spheres[sphere_inx].sphere_center); // sphere normal
 
     // light
     vec3 light_pos = vec3(2.0, 2.0, 2.0);
@@ -161,17 +176,17 @@ void main ()
     float refraction_coef = 0.155;
     float Epsilon = 0.001;
     vec3 point2 = point1 + Epsilon * normalized_view_dir;
-    vec3 normal_at_point2 = normalize(point1 - sphere_center);
+    vec3 normal_at_point2 = normalize(point1 - list_of_spheres[sphere_inx].sphere_center);
 
     vec3 point2_dir;
     refractionDirection(refraction_coef, normalized_view_dir, normal_at_point2, point2_dir); // first refraction
 
     float exit_t;
-    sphereIntersection(point2, normalize(point2_dir), sphere_center, radius, exit_t); // first sphere intersection
+    sphereIntersection(point2, normalize(point2_dir), list_of_spheres[sphere_inx].sphere_center, list_of_spheres[sphere_inx].radius, exit_t); // first sphere intersection
 
     vec3 point3 = point2 + exit_t * point2_dir;
     vec3 normalized_point2_dir = normalize(point2_dir);
-    vec3 normal_at_point3 = normalize(point3 - sphere_center);
+    vec3 normal_at_point3 = normalize(point3 - list_of_spheres[sphere_inx].sphere_center);
 
     vec3 point3_dir;
     refractionDirection( (1.0 / refraction_coef), normalized_point2_dir, normal_at_point3, point3_dir); // second refraction
