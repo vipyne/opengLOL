@@ -14,9 +14,10 @@
 #include <OpenGL/gl.h>
 #include <GLUT/glut.h>
 #include <ctime>
+#include <random>
 #include "glint.h"
 
-#define MAX_SPHERES 100
+#define MAX_SPHERES 5
 
 using namespace std;
 
@@ -46,6 +47,8 @@ GLuint size_of_texture;
 GLfloat theta = 0;
 clock_t endTime;
 GLfloat radiansPerSecond = 180.0 / M_PI * 2.0;
+GLfloat data[MAX_SPHERES * 3 * 4] = {0.0};
+
 
 string loadFragmentShader (const char* filename)
 {
@@ -58,6 +61,24 @@ string loadFragmentShader (const char* filename)
     line += '\n';
   }
   return line;
+}
+
+void vpGetSphereInfo(float* data, int sphereIndex, float pos[3], float* velocity, float* radius, float* rgb)
+{
+  int i = sphereIndex * 3 * 4;
+
+  pos[0] = data[i + 0];
+  pos[1] = data[i + 1];
+  pos[2] = data[i + 2];
+  *radius = data[i + 3];
+
+  velocity[0] = data[i + 4];
+  velocity[1] = data[i + 5];
+  velocity[2] = data[i + 6];
+
+  rgb[0] = data[i + 8];
+  rgb[1] = data[i + 9];
+  rgb[2] = data[i + 10];
 }
 
 void getSquareVertices (GLfloat* vertices)
@@ -106,9 +127,9 @@ void getSquareVertices (GLfloat* vertices)
   vertices[11] = p4z;
 }
 
-void initSphere(float* data, int startIndex, float* pos, float radius, float* rgb)
+void vpSetSphereInfo(float* data, int sphereIndex, float* pos, float* velocity, float radius, float* rgb)
 {
-  int i = startIndex * 3 * 4;
+  int i = sphereIndex * 3 * 4;
 
   // pos
   data[i + 0] = pos[0]; // x
@@ -116,10 +137,10 @@ void initSphere(float* data, int startIndex, float* pos, float radius, float* rg
   data[i + 2] = pos[2]; // z
   data[i + 3] = radius; // radius
   // velocity
-  data[i + 4] = 0.0; // v x
-  data[i + 5] = 1.0; // v y
-  data[i + 6] = 0.0; // v z
-  data[i + 7] = 1.0; // free for now
+  data[i + 4] = velocity[0]; // v x
+  data[i + 5] = velocity[1]; // v y
+  data[i + 6] = velocity[2]; // v z
+  data[i + 7] = 0.0; // free for now
   // color
   data[i + 8] = rgb[0]; // r
   data[i + 9] = rgb[1]; // g
@@ -127,18 +148,42 @@ void initSphere(float* data, int startIndex, float* pos, float radius, float* rg
   data[i + 11] = 1.0; // free for now
 }
 
+void vpSetupSpheres()
+{
+  std::default_random_engine generator;
+  std::normal_distribution<float> xJitter(0, 0.1);
+  std::uniform_real_distribution<float> marginJitter(0.1, 0.5);
+  std::uniform_real_distribution<float> colorJitter(0, 1);
+  std::uniform_real_distribution<float> radiusJitter(0.1, 0.3);
+  float prevR = 2.0;
+  float pos[3] = {0.0};
+  float colors[3] = {0.0};
+  float averageX = 0;
+  float posY = -3.0;
+  float velocity[] = {0.0, 50.0, 0.0};
+
+  for (int i = 0; i < MAX_SPHERES; ++i) {
+    float radius;
+    pos[0] = xJitter(generator) + averageX;
+    pos[1] = posY;
+    pos[2] = -2.0;
+    radius = radiusJitter(generator);
+    colors[0] = colorJitter(generator);
+    colors[1] = colorJitter(generator);
+    colors[2] = colorJitter(generator);
+    posY -= prevR + radius + marginJitter(generator);
+    prevR = radius;
+    vpSetSphereInfo(data, i, pos, velocity, radius, colors);
+    std::cout<<"pos : " << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+    std::cout<<"radius : " << radius << std::endl;
+  }
+}
+
 void vpLoadTexture()
 {
   int num_of_floats = MAX_SPHERES * 3 * 4;
-  GLfloat data[MAX_SPHERES * 3 * 4] = {0.0};
 
-  float p1[] = {2.0, 0.0, -2.0};
-  float color1[] = {1.0, 0.0, 0.0};
-  float p2[] = {-2.0, 0.0, -2.0};
-  float color2[] = {0.0, 0.0, 1.0};
-  // 2 spheres
-  initSphere(data, 0, p1, 0.25, color1);
-  initSphere(data, 1, p2, 0.25, color2);
+  vpSetupSpheres();
 
   glGenTextures(1, &texture_id);
   glBindTexture(GL_TEXTURE_1D, texture_id);
@@ -225,11 +270,32 @@ void vpInitCanvas()
   glBindVertexArrayAPPLE(vertex_array_object_id);
 }
 
+void vpUpdateSpheres(GLfloat dt)
+{
+  for (int i = 0; i < MAX_SPHERES; ++i) {
+    float newPos[3];
+    float newVelocity[3];
+    float newRadius;
+    float newRGB[3];
+    vpGetSphereInfo(data, i, newPos, newVelocity, &newRadius, newRGB);
+    if (newPos[1] > 3.0)
+      newPos[1] = -3.0;
+    newPos[0] += newVelocity[0] * dt;
+    newPos[1] += newVelocity[1] * dt;
+    newPos[2] += newVelocity[2] * dt;
+    std::cout<<"pos : " << newPos[0] << " " << newPos[1] << " " << newPos[2] << " " <<"radius: " << newRadius << std::endl;
+    vpSetSphereInfo(data, i, newPos, newVelocity, newRadius, newRGB);
+  }
+}
+
 void vpTimer(int vp_time)
 {
   clock_t startTime = clock();
   GLfloat dt = (float)(clock() - endTime)/CLOCKS_PER_SEC;
   theta += dt * radiansPerSecond;
+
+  vpUpdateSpheres(dt);
+
 
   endTime = startTime;
   glutPostRedisplay();
@@ -260,10 +326,12 @@ void vpDraw ()
 
   GLuint sphere_info_u_location = glGetUniformLocation(shaderProgram, "sphere_info");
   GLuint num_spheres_u_location = glGetUniformLocation(shaderProgram, "num_of_spheres");
-  glUniform1f(num_spheres_u_location, 2);
+  glUniform1f(num_spheres_u_location, MAX_SPHERES);
 
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_1D, texture_id);
+  glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F_ARB, size_of_texture, 0, GL_RGBA, GL_FLOAT, data);
+
   glUniform1i(sphere_info_u_location, 0);
 
   glBindVertexArrayAPPLE(vertex_array_object_id);
@@ -276,7 +344,7 @@ int main (int argc, char *argv[])
 {
   std::cout << "^^^^ starting program..." << std::endl;
 
-  fragment_shader_source = loadFragmentShader("fragmentShader_v12.fs");
+  fragment_shader_source = loadFragmentShader("fragmentShader_v13.fs");
 
   // glut multisampling
   //
