@@ -17,7 +17,7 @@
 #include <random>
 #include "glint.h"
 
-#define MAX_SPHERES 5
+#define MAX_SPHERES 100
 
 using namespace std;
 
@@ -154,7 +154,7 @@ void vpSetupSpheres()
   std::normal_distribution<float> xJitter(0, 0.1);
   std::uniform_real_distribution<float> marginJitter(0.1, 0.5);
   std::uniform_real_distribution<float> colorJitter(0, 1);
-  std::uniform_real_distribution<float> radiusJitter(0.1, 0.3);
+  std::exponential_distribution<float> radiusJitter(0.1);
   float prevR = 2.0;
   float pos[3] = {0.0};
   float colors[3] = {0.0};
@@ -283,7 +283,7 @@ void vpUpdateSpheres(GLfloat dt)
     newPos[0] += newVelocity[0] * dt;
     newPos[1] += newVelocity[1] * dt;
     newPos[2] += newVelocity[2] * dt;
-    std::cout<<"pos : " << newPos[0] << " " << newPos[1] << " " << newPos[2] << " " <<"radius: " << newRadius << std::endl;
+    // std::cout<<"pos : " << newPos[0] << " " << newPos[1] << " " << newPos[2] << " " <<"radius: " << newRadius << std::endl;
     vpSetSphereInfo(data, i, newPos, newVelocity, newRadius, newRGB);
   }
 }
@@ -344,7 +344,7 @@ int main (int argc, char *argv[])
 {
   std::cout << "^^^^ starting program..." << std::endl;
 
-  fragment_shader_source = loadFragmentShader("fragmentShader_v13.fs");
+  fragment_shader_source = loadFragmentShader("fragmentShader_v14.fs");
 
   // glut multisampling
   //
