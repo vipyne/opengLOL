@@ -366,9 +366,9 @@ void vpDraw ()
 
 int main (int argc, char *argv[])
 {
-  std::cout << "^^^^ starting program..." << std::endl;
+  std::cout << "^^^^ B U B B L E Z ^^^^" << std::endl;
 
-  fragment_shader_source = loadFragmentShader("fragmentShader_v14.fs");
+  fragment_shader_source = loadFragmentShader("fragment_shader/fragmentShader_v14.fs");
 
   // glut multisampling
 
