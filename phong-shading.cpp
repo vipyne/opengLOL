@@ -366,7 +366,7 @@ void vpDraw ()
 
 int main (int argc, char *argv[])
 {
-  std::cout << "^^^^ B U B B L E Z ^^^^" << std::endl;
+  std::cout << "^^^^ B U B B L E S ^^^^" << std::endl;
 
   fragment_shader_source = loadFragmentShader("fragment_shader/fragmentShader_v14.fs");
 
@@ -377,7 +377,7 @@ int main (int argc, char *argv[])
   /////////// glutInitDisplayMode(GLUT_RGBA | GLUT_3_2_CORE_PROFILE);
   glutInitWindowSize(720, 480);
   glutInitWindowPosition(50, 50);
-  glutCreateWindow("phong phong phong phong phong");
+  glutCreateWindow("bubbles ray tracing shader");
   glutDisplayFunc(vpDraw);
   vpInitCanvas();
   /////////// glEnable(GL_MULTISAMPLE_ARB);
