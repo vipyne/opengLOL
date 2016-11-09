@@ -31,7 +31,7 @@ const char *vertex_shader_source =                "\n" \
 "void main ()                                      \n" \
 "{                                                 \n" \
 "   gl_Position = vec4(pos, 1.0);                  \n" \
-"   v_pos = vec4(pos.x * 1.5, pos.y, pos.z, 1.0); \n" \
+"   v_pos = vec4(pos.x * 1.5, pos.y, pos.z, 1.0);  \n" \
 "}                                                 \n" \
 "\n";
 
@@ -43,7 +43,6 @@ void getSquareVertices (GLfloat* vertices);
 void vpUpdateSpheres(GLfloat dt);
 void vpSetSphereInfo(float* data, int sphereIndex, float* pos, float* velocity, float radius, float* rgb);
 void vpSetupSpheres();
-
 
 // global variables
 GLuint shaderProgram;
@@ -59,7 +58,6 @@ GLfloat data[MAX_SPHERES * 3 * 4] = {0.0};
 std::default_random_engine generator;
 std::normal_distribution<float> xJitter(0, 0.1);
 int num_spheres = MAX_SPHERES;
-
 
 string loadFragmentShader (const char* filename)
 {
@@ -101,7 +99,7 @@ bool vpUpdateSphereById(float* data, int sphereIndex, GLfloat dt)
   float newRGB[3];
   vpGetSphereInfo(data, sphereIndex, newPos, newVelocity, &newRadius, newRGB);
   if (newPos[1] > 3.0) {
-    newPos[1] = -3.0;
+    newPos[1] -= 6.0;
     newPos[0] += 1.0;
   }
   if (newPos[0] > 3.0) {
@@ -112,6 +110,7 @@ bool vpUpdateSphereById(float* data, int sphereIndex, GLfloat dt)
   newPos[1] += newVelocity[1] * dt;
   newPos[2] += newVelocity[2] * dt;
   vpSetSphereInfo(data, sphereIndex, newPos, newVelocity, newRadius, newRGB);
+
   return finished;
 }
 
@@ -212,8 +211,6 @@ void vpSetupSpheres()
     colors[2] = colorJitter(generator);
     prevR = radius;
     vpSetSphereInfo(data, i, pos, velocity, radius, colors);
-    std::cout<<", radius : " << radius << std::endl;
-    std::cout<<"pos : " << pos[0] << " " << pos[1] << " " << pos[2];
   }
 
   // bool finished = false;
@@ -374,9 +371,7 @@ int main (int argc, char *argv[])
   fragment_shader_source = loadFragmentShader("fragmentShader_v14.fs");
 
   // glut multisampling
-  //
 
-  // std::cout << "^^^^ fragment_shader_source" << fragment_shader_source << std::endl;
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGBA);
   /////////// glutInitDisplayMode(GLUT_RGBA | GLUT_3_2_CORE_PROFILE);
