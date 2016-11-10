@@ -17,7 +17,7 @@
 #include <random>
 #include "glint.h"
 
-#define MAX_SPHERES 100
+#define MAX_SPHERES 1000
 
 using namespace std;
 
@@ -106,7 +106,7 @@ bool vpUpdateSphereById(float* data, int sphereIndex, GLfloat dt)
     newPos[0] = -3.0 + xJitter(generator);
     finished = true;
   }
-  newPos[0] += newVelocity[0] * dt + sin(theta + sphereIndex)/10;
+  newPos[0] += newVelocity[0] * dt + sin(theta + sphereIndex)/20;
   newPos[1] += newVelocity[1] * dt;
   newPos[2] += newVelocity[2] * dt;
   vpSetSphereInfo(data, sphereIndex, newPos, newVelocity, newRadius, newRGB);
