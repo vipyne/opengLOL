@@ -1,3 +1,4 @@
+// reflection
 #ifdef GL_ES
   precision mediump float;
 #endif
@@ -65,9 +66,9 @@ void computeColor(in vec3 ray_start, in vec3 ray_dir, out vec4 color)
 
 void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_center, in float radius, out float t)
 {
-  vec3 sphere_dir = sphere_center - ray_start;            // intersection test
-  float sphere_len = length(sphere_center - ray_start);            // intersection test
-  float projection = dot(sphere_dir, ray_dir); // intersection test
+  vec3 sphere_dir = sphere_center - ray_start;             // intersection test
+  float sphere_len = length(sphere_center - ray_start);    // intersection test
+  float projection = dot(sphere_dir, ray_dir);             // intersection test
   vec3 dir_perpendicular = sphere_dir - (ray_dir * projection); // intersection test
   float len_dir_perpend = length(dir_perpendicular);       // intersection test
 
@@ -183,6 +184,8 @@ void main ()
     vec3 point2 = point1 + Epsilon * normalized_view_dir;
     vec3 normal_at_point2 = normalize(point1 - hit_sphere_pos_rad.xyz);
 
+
+
     vec3 point2_dir;
     refractionDirection(refraction_coef, normalized_view_dir, normal_at_point2, point2_dir); // first refraction
 
@@ -195,6 +198,29 @@ void main ()
 
     vec3 point3_dir;
     refractionDirection( (1.0 / refraction_coef), normalized_point2_dir, normal_at_point3, point3_dir); // second refraction
+
+
+
+    ////////
+    vec3 point4 = point3 + Epsilon * normalized_view_dir;
+    vec3 normal_at_point4 = normalize(point3 - hit_sphere_pos_rad.xyz);
+
+    vec3 point4_dir;
+    refractionDirection(refraction_coef, normalized_view_dir, normal_at_point3, point4_dir); // third refraction
+
+    float exit_t__2;
+    sphereIntersection(point4, normalize(point3_dir), hit_sphere_pos_rad.xyz, hit_sphere_pos_rad.w, exit_t__2); // second sphere intersection
+
+    vec3 point4 = point3 + exit_t_2 * point3_dir;
+    vec3 normalized_point3_dir = normalize(point3_dir);
+    vec3 normal_at_point4 = normalize(point4 - hit_sphere_pos_rad.xyz);
+
+    vec3 point4_dir;
+    refractionDirection( (1.0 / refraction_coef), normalized_point3_dir, normal_at_point4, point4_dir); // fourth refraction
+    ////////
+
+
+
 
     vec4 refraction_color;
     computeColor(point3, normalize(point3_dir), refraction_color); // second sphere intersection
