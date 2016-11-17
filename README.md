@@ -1,9 +1,17 @@
 # opengLOL
 
-##Phong Shader:
+##Phong Shader
 
-  compile-
-  ```$ make phong```
+compile:
+```
+$ make phong
+```
 
-![new alt](https://github.com/vipyne/opengLOL/blob/master/bubbles.gif)
-![new alt](https://github.com/vipyne/opengLOL/blob/master/screenshots/step_11-frag-09.png)
+run:
+```
+$ ./phong.exe
+```
+
+![new alt](https://github.com/vipyne/opengLOL/blob/master/screenshots/readmedia/1000bubbles.gif)
+
+WIP. More documentation to come soon!
