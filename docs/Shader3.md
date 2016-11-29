@@ -6,19 +6,8 @@ a single sphere so it's located at (0,0,-2). In other words, Y points UP and Z p
 To start, let's test our scene with a simple intersection test. Here, we only care whether we hit the sphere or not, not the 
 position at which we intersect the sphere.
 
-Each pixel has a coordinate on the viewplane that corresponds to a point in the world. The GPU automatically interpolates this 
-position for us based on the four corners of the square we're drawing, e.g. by passing through the global position of the square's vertex 
-positions in the vertex shader like so
-
-```
-attribute vec3 pos;       
-varying vec4 v_pos;  // v_pos will be passed through and interpolated for us, thanks GPU!
-void main ()                 
-{                                 
-   gl_Position = vec4(pos, 1.0);       
-   v_pos = vec4(pos.x, pos.y, pos.z, 1.0);
-}                                            
-```
+Recall each pixel has a coordinate on the viewplane that corresponds to a point in the world. The GPU automatically interpolates this 
+position for us based on the four corners of the square we're drawing (thanks, GPU!).
 
 Using the pixel's world positions, we can construct a ray emanating from the camera through each pixel center. If this ray 
 intersects our sphere, we will draw a white pixel. Otherwise, we will draw a black pixel.
@@ -58,3 +47,5 @@ void main ()
 ```
 
 ![step_03](https://github.com/vipyne/opengLOL/blob/master/screenshots/step_05.png)
+
+The sphere is a bit warped. We'll get to that.
