@@ -24,3 +24,6 @@ phong:
 
 spin:
 	g++ transpose-try-angle.cpp -o spin.exe -std=c++11 -framework OpenGL -framework GLUT -Wno-deprecated -framework CoreGraphics
+
+phong-cygwin:
+	g++ phong-shading.cpp -o phong.exe -std=c++11 -Wno-deprecated -DCYGWIN -lglew -lglut -lgl -lglu
