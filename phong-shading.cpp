@@ -205,10 +205,11 @@ void vpSetupSpheres()
     posY += prevR + radius + marginJitter(generator);
     pos[0] = xJitter(generator) + averageX;
     pos[1] = posY;
-    pos[2] = -2.0;
-    colors[0] = colorJitter(generator);
+    // pos[2] = -2.0;
+    pos[2] = xJitter(generator) - 2.0;
+    colors[0] = colorJitter(generator) + pos[2]/100;
     colors[1] = colorJitter(generator);
-    colors[2] = colorJitter(generator);
+    colors[2] = colorJitter(generator) + pos[2]/100;
     prevR = radius;
     vpSetSphereInfo(data, i, pos, velocity, radius, colors);
   }
@@ -376,7 +377,7 @@ int main (int argc, char *argv[])
   glutInitDisplayMode(GLUT_RGBA);
   /////////// glutInitDisplayMode(GLUT_RGBA | GLUT_3_2_CORE_PROFILE);
   glutInitWindowSize(720, 480);
-  glutInitWindowPosition(50, 50);
+  glutInitWindowPosition(300, 200);
   glutCreateWindow("bubbles ray tracing shader");
   glutDisplayFunc(vpDraw);
   vpInitCanvas();
