@@ -1,5 +1,3 @@
-# Ray tracing in the fragment shader: step by step
-
 ## Shader \#0
 
 To start, color every pixel a solid color
