@@ -6,7 +6,25 @@ geometry.
 
 To start, let's simply define our quad geometry and draw it. The quad is a square having four vertices, centered at the origin.
 
-If we use the same shader as before, we get the following output. Now it covers the who screen and not just our triangle.
+In our previous shader, we used gl_FragCoord to customize the color of each pixel. However, now that we are drawing a quad to represent 
+our viewplane, we can get the worldspace coordinate of each pixel by passing through the global position of the square's vertex 
+positions in the vertex shader like so
+
+```
+attribute vec3 pos;       
+varying vec4 v_pos;  // v_pos will be passed through and interpolated for us, thanks GPU!
+void main ()                 
+{                                 
+   gl_Position = vec4(pos, 1.0);       
+   v_pos = vec4(pos.x, pos.y, pos.z, 1.0);
+}                                            
+```
+
+The vertex shader is called for every vertex, but the fragment shader is called for each pixel. 
+In the fragment shader, each pixel will have a coordinate on the viewplane that corresponds to a point in the world. 
+The GPU automatically interpolates this position for us based on the four corners of the square we're drawing.
+
+If we use the same shader as before, we get the following output. Now it covers the who screen and not just our triangle. 
 
 ![step \#2](https://github.com/vipyne/opengLOL/blob/master/screenshots/step_03.png "Step \#2 Results")
 
