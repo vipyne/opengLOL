@@ -4,6 +4,8 @@ var pMatrix = mat4.create();
 var shaderProgram;
 var gl;
 var vertices = [];
+var theta = 0;
+var lastTime = 0;
 
 function initGL(canvas)
 {
@@ -76,13 +78,13 @@ function getSquareVertices (vertices)
 {
   // GLfloat camera_positon = {0, 0, 2};
   var near_plane = 2;
-  var theta = 30;
+  var fov = 30;
   var screen = [720, 480];
 
   var world_height;
   var world_width;
 
-  world_height = 2 * Math.tan(theta);
+  world_height = 2 * Math.tan(fov);
   world_width = (world_height * screen[0]) / screen[1];
 
   var p1x = -(world_width/2);
@@ -120,28 +122,10 @@ function getSquareVertices (vertices)
 
 function initBuffers()
 {
-   var newVec3 = vec3.create();
-   mat4.perspective(pMatrix, 45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0);
-   mat4.identity(mvMatrix);
-   mat4.translate(mvMatrix, mvMatrix, [0,0,-10]);
-
-   var newVec01 = vec4.create();
-   var newVec02 = vec4.create();
-   var newVec03 = vec4.create();
-   var newVec04 = vec4.create();
-
    getSquareVertices(vertices);
-   // var v1 = vec4.set(newVec01, 1.0,  1.0,  0.0, 1.0);
-   // var v2 = vec4.set(newVec02, -1.0,  1.0,  0.0, 1.0);
-   // var v3 = vec4.set(newVec03, 1.0,  -1.0,  0.0, 1.0);
-   // var v4 = vec4.set(newVec04, -1.0,  -1.0,  0.0, 1.0);
-   // vertices = [ v1, v2, v3, v4 ];
-
-   var flatVerticesBuffer = [];
-
-   // //mat4.ortho = function (out, left, right, bottom, top, near, far) {
    mat4.ortho(pMatrix, -1.0, 1.0, -1.0, 1.0, -1.0, 10.0);
 
+   var flatVerticesBuffer = [];
    for (var i = 0; i < vertices.length; i+=3) {
       x = vertices[i+0]
       y = vertices[i+1]
@@ -149,11 +133,8 @@ function initBuffers()
       var tmpVec4 = vec4.create()
       vec4.set(tmpVec4, x, y, z, 1)
 
-      // vec4.transformMat4(vertices[i], vertices[i], mvMatrix);
       vec4.transformMat4(tmpVec4, tmpVec4, pMatrix)
-      // vec4.transformMat4(vertices[i], vertices[i], pMatrix);
       flatVerticesBuffer.push(tmpVec4[0], tmpVec4[1], tmpVec4[2]);
-      console.log('after vertices[i] : ', tmpVec4)
    }
 
    squareVertexPositionBuffer = createGlBuffer(new Float32Array(flatVerticesBuffer), 3, 4, gl.STATIC_DRAW);
@@ -164,16 +145,28 @@ function drawScene()
    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-   //mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-   //mat4.identity(mvMatrix);
-   //mat4.translate(mvMatrix, mvMatrix, [0,0,-10]);
-
    gl.useProgram(shaderProgram);
    gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexPositionBuffer);
    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, squareVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
 
+   var utheta = gl.getUniformLocation(shaderProgram, "theta");
+   gl.uniform1f(utheta, theta);
+
    gl.drawArrays(gl.TRIANGLE_FAN, 0, squareVertexPositionBuffer.numItems);
 }
+
+
+function tick()
+{
+    var newTime = new Date().getTime();
+    var dt = (newTime - lastTime)*0.001;
+    theta += dt * 0.5;
+
+    requestAnimFrame(tick);
+    drawScene();
+    lastTime = newTime
+}
+
 
 function webGLStart()
 {
@@ -182,10 +175,8 @@ function webGLStart()
    initShaders();
    initBuffers();
 
+   lastTime =  new Date().getTime();
    gl.clearColor(0.1, 0.1, 0.1, 1.0);
-   drawScene();
+   tick();
 }
 
-function onFragmentShaderLoad()
-{
-}
