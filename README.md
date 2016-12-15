@@ -32,3 +32,4 @@ sphere and a camera. If a ray emanating from the cemera through a pixel intersec
 <p><img src="https://github.com/vipyne/opengLOL/blob/master/screenshots/step_06.png" alt="Drawing" height="64"/>
 <a href="https://github.com/vipyne/opengLOL/blob/master/docs/Shader4.md">Shader #4</a> In which, we compute the points at which a ray intersects the sphere, and then use that point to compute diffuse shading.
 
+<a href='http://www.recurse.com' title='Made with love at the Recurse Center'><img src='https://cloud.githubusercontent.com/assets/2883345/11322973/9e557144-910b-11e5-959a-8fdaaa4a88c5.png' height='14px'/></a>
