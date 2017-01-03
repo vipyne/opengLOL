@@ -201,7 +201,7 @@ void main ()
     vec4 refraction_color;
     computeColor(point3, normalize(point3_dir), refraction_color); // second sphere intersection
 
-    gl_FragColor = diffuse_k * hit_sphere_rgb + specular_color + refraction_color;
+    gl_FragColor = 0.5*hit_sphere_rgb + specular_color + 0.5*refraction_color;
     // gl_FragColor = diffuse_k * vec4(0.36, 0.40, 0.650, 1.0) + ambient_color + specular_color + reflection + refraction_color;
   }
 

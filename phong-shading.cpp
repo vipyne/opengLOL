@@ -11,10 +11,18 @@
 #include <iostream>
 #include <fstream>
 #include <math.h>
-#include <OpenGL/gl.h>
-#include <GLUT/glut.h>
 #include <ctime>
 #include <random>
+#ifdef CYGWIN
+#define M_PI 3.14
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glut.h>
+#include <GL/glext.h>
+#else
+#include <OpenGL/gl.h>
+#include <GLUT/glut.h>
+#endif
 #include "glint.h"
 
 #define MAX_SPHERES 1000
@@ -379,6 +387,19 @@ int main (int argc, char *argv[])
   glutInitWindowSize(720, 480);
   glutInitWindowPosition(300, 200);
   glutCreateWindow("bubbles ray tracing shader");
+
+#ifdef CYGWIN
+   glewInit();
+   if (glewIsSupported("GL_VERSION_2_0"))
+   {
+      printf("Ready for OpenGL 2.0\n");
+   }
+   else 
+   {
+      printf("OpenGL 2.0 not supported\n");
+      exit(1);
+   }
+#endif  
   glutDisplayFunc(vpDraw);
   vpInitCanvas();
   /////////// glEnable(GL_MULTISAMPLE_ARB);

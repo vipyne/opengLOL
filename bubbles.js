@@ -1,4 +1,4 @@
-var MAX_SPHERES = 50;
+var MAX_SPHERES = 100;
 var squareVertexPositionBuffer;
 var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
