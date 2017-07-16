@@ -102,8 +102,10 @@ void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_cente
     vec3 p = ray_start + d * ray_dir;
     vec3 n = p - sphere_center;
     float distance = length(n);
+    n = n / distance;
+    vec3 surfacep = sphere_center + radius * n;
     float offset;
-    deform0(p, theta, offset, maxDisplacement);
+    deform0(surfacep, theta, offset, maxDisplacement);
     surfaceDistance = radius + offset;
     if (distance < surfaceDistance) {
         t = d;
@@ -141,8 +143,8 @@ void main ()
   vec3 normalized_view_dir = normalize(view_dir);
 
   // rotate camera by 45
-  float angle1 = 3.14/15.0;
-  float angle2 = -3.14/20.0;
+  float angle1 = 3.14/8.0;
+  float angle2 = -3.14/8.0;
   // first 3 vars = first column
   mat3 m = mat3(
     cos(angle1), 0, sin(angle1), // first column 
