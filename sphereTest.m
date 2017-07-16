@@ -4,13 +4,14 @@ offsetX = X;
 offsetY = Y;
 offsetZ = Z;
 
+%range = [];
 figure
 s = surfl(offsetX, offsetY, offsetZ);
 for T=1:0.1:20
 for i=1:n+1
     for j=1:n+1
         offset = (1+cos(T))*0.25*3.14;
-        scale = sin(X(i,j)*Z(i,j)*20.0+offset) * 0.5;
+        scale = sin(X(i,j)*Z(i,j)*20.0+offset) * 0.2;
         normal = [X(i,j) Y(i,j) Z(i,j)]';
         normal = normal ./ norm(normal,2);
         
@@ -18,6 +19,7 @@ for i=1:n+1
         offsetY(i,j) = scale*normal(2) + Y(i,j);
         offsetZ(i,j) = scale*normal(3) + Z(i,j);
         
+ %       range = [range; scale];
     end
 end
 
@@ -27,9 +29,8 @@ s.ZData = offsetZ;
 s = surfl(offsetX, offsetY, offsetZ);
 
 refresh;
+daspect([2 2 2])
 pause(0.1);
-theta
-
 end
 
 syms theta phi r A B C
