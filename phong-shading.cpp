@@ -206,7 +206,7 @@ void vpSetupSpheres()
   float colors[3] = {0.0};
   float averageX = -3.0;
   float posY = -3.0;
-  float velocity[] = {0.0, 50.0, 0.0};
+  float velocity[] = {0.0, 5.0, 0.0};
 
   for (int i = 0; i < MAX_SPHERES; ++i) {
     float radius = radiusJitter(generator);
@@ -377,13 +377,13 @@ int main (int argc, char *argv[])
 {
   std::cout << "^^^^ B U B B L E S ^^^^" << std::endl;
 
-  fragment_shader_source = loadFragmentShader("fragment_shader/fragmentShader_v14.fs");
+  fragment_shader_source = loadFragmentShader("fragment_shader/fragmentShader_v16.fs");
 
   // glut multisampling
 
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGBA);
-  /////////// glutInitDisplayMode(GLUT_RGBA | GLUT_3_2_CORE_PROFILE);
+  // glutInitDisplayMode(GLUT_RGBA | GLUT_3_2_CORE_PROFILE);
   glutInitWindowSize(720, 480);
   glutInitWindowPosition(300, 200);
   glutCreateWindow("bubbles ray tracing shader");
@@ -394,12 +394,12 @@ int main (int argc, char *argv[])
    {
       printf("Ready for OpenGL 2.0\n");
    }
-   else 
+   else
    {
       printf("OpenGL 2.0 not supported\n");
       exit(1);
    }
-#endif  
+#endif
   glutDisplayFunc(vpDraw);
   vpInitCanvas();
   /////////// glEnable(GL_MULTISAMPLE_ARB);
