@@ -105,11 +105,12 @@ void surfaceNormal(in float r, in vec3 p, out vec3 n, in vec3 sphere_center)
 
   vec3 normal;
 
-  if (dr1 < 0.01) {
+  // todo: add smoothstep
+  if (dr1 > 0.01) {
     vec3 norm1 = normalize(sphere_1_pos - p);
     normal += norm1;
   }
-  if (dr2 < 0.01){
+  if (dr2 > 0.01){
     vec3 norm2 = normalize(sphere_2_pos - p);
     normal += norm2;
   }
