@@ -96,57 +96,62 @@ void surfaceNormal(in float distance, in vec3 p, out vec3 n)
 {
 }
 
-void blob(in vec3 p, in float theta, out float d, out float maxDisplacement, in vec3 sphere_center)
+void blobTest(in float r, out float d, out int intersect)
+{
+    float a = 2.0 /2.0;
+    float b = 1.0 /2.0;
+
+    intersect = 0;
+    d = 0.0;
+    if (r < b) {
+        if ( 0.0 <= r && r <= b/3.0) {
+          d = a * (1.0 - 3.0 * r / pow(b, 2.0) );
+        } /*else if (b/3.0 <= r && r <= b) {
+          d = 3.0 * a/2.0 * pow(1.0 - r/b, 2.0);
+        }*/
+        intersect = 1;
+    }
+}
+
+void blob(in vec3 p, in float theta, out float d, in vec3 sphere_center)
 {
   vec3 sphere_1_pos = vec3(cos(theta), sin(theta), 0.0) + sphere_center;
   vec3 sphere_2_pos = vec3(cos(-theta), sin(-theta), 0.0) + sphere_center;
 
-  float offset = (1.0 + cos(theta)) * 3.14 * 4.0;
   float p_to_1 = length(sphere_1_pos - p);
   float p_to_2 = length(sphere_2_pos - p);
 
-  float a = 2.0;
-  float b = 1.0;
+  float sum = 0.0;
+  //int intersects = 0; 
+  //int result;
+  //float dr1, dr2;
+  //blobTest(p_to_1, dr1, result);
 
-  float dr1;
-  float dr2;
+  //intersects += result;
+  //sum += dr1;
+  //blobTest(p_to_2, dr2, result);
+  //intersects += result;
+  //sum += dr2;
 
-  if ( 0.0 <= p_to_1 && p_to_1 <= b/3.0) {
-    dr1 = a * (1.0 - (3.0 * p_to_1) / pow(b, 2.0) );
-  } else if (b/3.0 <= p_to_1 && p_to_1 <= b) {
-    dr1 = 3.0 * a/2.0 * pow((1.0 - p_to_1/b), 2.2);
-  }
+  float a = 2.0 / 2.0;
+  float b = 1.0 / 2.0;
 
-  if ( 0.0 <= p_to_2 && p_to_2 <= b/3.0) {
-    dr2 = a * (1.0 - (3.0 * p_to_2) / pow(b, 2.2));
-  } else if (b/3.0 <= p_to_2 && p_to_2 <= b) {
-    dr2 = 3.0 * a/2.0 * pow((1.0 - p_to_1/b), 2.2);
-  }
+  float dr1 = a * exp(-b * 100.0 * pow(p_to_1, 2.0));
+  float dr2 = a * exp(-b * 100.0 * pow(p_to_2, 2.0));
 
-  // float dr1 = a * exp(-b * pow(p_to_1, 2.0));
-  // float dr2 = a * exp(-b * pow(p_to_2, 2.0));
-
-  d = dr1 + dr2;
-  // d = dr1 + dr2;
-
-  maxDisplacement = 10.2 * 13.0;
+  d = 999999.0;
+  //if (intersects > 0) d = dr1 + dr2;
+  d = 2.0 - (dr2 + dr1);
 }
 
-void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_center, in float radius, in float theta,
-        out float t, out float surfaceDistance, out float maxDisplacement)
+void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_center, in float radius, in float theta, out float t)
 {
   t = -1.0;
   for (float d = 0.5; d < 4.0; d += 0.01) {
     vec3 p = ray_start + d * ray_dir;
-    vec3 n = p - sphere_center;
-    float distance = length(n);
-    n = n / distance;
-    vec3 surfacep = sphere_center + radius * n;
-    float offset;
-    // deform2(surfacep, theta, offset, maxDisplacement);
-    blob(p, theta, offset, maxDisplacement, sphere_center);
-    surfaceDistance = radius + offset;
-    if (offset > 1.750) {
+    float distance = 0.0;
+    blob(p, theta, distance, sphere_center);
+    if (distance < 1.95) {
         t = d;
         return;
     }
@@ -201,8 +206,7 @@ void main ()
   camera_pos = m2 * m * (camera_pos - sphere_center) + sphere_center;
 
   float t;
-  float distanceFromCenter;
-  sphereIntersection(camera_pos, normalized_view_dir, sphere_center, radius, theta, t, distanceFromCenter, maxDisplacement);
+  sphereIntersection(camera_pos, normalized_view_dir, sphere_center, radius, theta, t);
 
   if (t < 0.0) {
     vec4 color;
@@ -259,9 +263,7 @@ void main ()
     vec4 refraction_color;
     computeColor(point3, normalize(point3_dir), refraction_color); // second sphere intersection
 */
-    float frac = (distanceFromCenter - radius)/maxDisplacement;
-    vec4 color = frac * vec4(1.0, 1.0, 1.0, 1.0) + vec4(0.25, 0.6, 0.7, 1.0);
-    gl_FragColor = color; //diffuse_k * vec4(0.36, 0.40, 0.650, 1.0) +specular_color + refraction_color;
+    gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); 
   }
 
 }
