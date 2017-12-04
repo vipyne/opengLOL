@@ -1,4 +1,4 @@
-var fragmentProgram = `
+var fragmentProgram =
 // relection
 #ifdef GL_ES
   precision mediump float;
@@ -94,7 +94,7 @@ void surfaceNormal(in float distance, in vec3 p, out vec3 n)
 {
 }
 
-void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_center, in float radius, in float theta, 
+void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_center, in float radius, in float theta,
         out float t, out float surfaceDistance, out float maxDisplacement)
 {
   t = -1.0;
@@ -147,15 +147,15 @@ void main ()
   float angle2 = -3.14/8.0;
   // first 3 vars = first column
   mat3 m = mat3(
-    cos(angle1), 0, sin(angle1), // first column 
+    cos(angle1), 0, sin(angle1), // first column
     0, 1, 0, // second column
     -sin(angle1), 0, cos(angle1)  // third column
-  );  
+  );
   mat3 m2 = mat3(
-    1, 0, 0, // first column 
+    1, 0, 0, // first column
     0, cos(angle2), sin(angle2), // second column
     0, -sin(angle2), cos(angle2)  // third column
-  );  
+  );
   normalized_view_dir = m2 * m * normalized_view_dir;
   camera_pos = m2 * m * (camera_pos - sphere_center) + sphere_center;
 
@@ -224,4 +224,4 @@ void main ()
   }
 
 }
-`;
+;
