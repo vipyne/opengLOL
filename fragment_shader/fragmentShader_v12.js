@@ -7,8 +7,6 @@ var fragmentProgram =`
 varying vec4 v_pos;
 uniform float theta;
 
-
-
 void planeIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 box_normal, in vec3 box_p1,
   out float plane_intersect)
   {
@@ -92,8 +90,32 @@ void deform1(in vec3 p, in float theta, out float d, out float maxDisplacement)
    maxDisplacement = 0.2 * 2.0;
 }
 
-void surfaceNormal(in float distance, in vec3 p, out vec3 n)
+void surfaceNormal(in float r, in vec3 p, out vec3 n, in vec3 sphere_center)
 {
+  vec3 sphere_1_pos = vec3(cos(theta), sin(theta), 0.0) + sphere_center;
+  vec3 sphere_2_pos = vec3(cos(-theta), sin(-theta), 0.0) + sphere_center;
+  float p_to_1 = length(sphere_1_pos - p);
+  float p_to_2 = length(sphere_2_pos - p);
+
+  float a = 2.0 / 2.0;
+  float b = 1.0 / 2.0;
+
+  float dr1 = a * exp(-b * 100.0 * pow(p_to_1, 2.0));
+  float dr2 = a * exp(-b * 100.0 * pow(p_to_2, 2.0));
+
+  vec3 normal;
+
+  if (dr1 < 0.01) {
+    vec3 norm1 = normalize(sphere_1_pos - p);
+    normal += norm1;
+  }
+  if (dr2 < 0.01){
+    vec3 norm2 = normalize(sphere_2_pos - p);
+    normal += norm2;
+  }
+
+  n = normalize(normal);
+  // n = -2.0 * a * b * r * exp(-b * pow(r, 2.0));
 }
 
 void blob(in vec3 p, in float theta, out float d, in vec3 sphere_center)
@@ -147,8 +169,6 @@ void refractionDirection(in float refraction_coef, in vec3 input_dir, in vec3 no
 
 void main ()
 {
-
-
   vec3 camera_pos = vec3(0.0, 0.0, 0.0);
   vec3 sphere_center = vec3(0.0, 0.0, -2.0);
   float radius = 0.10;
@@ -158,7 +178,7 @@ void main ()
   vec3 normalized_view_dir = normalize(view_dir);
 
   // rotate camera by 45
-  float angle1 = 0.0;
+  float angle1 = theta;
   float angle2 = 0.0;
   // first 3 vars = first column
   mat3 m = mat3(
@@ -186,7 +206,12 @@ void main ()
     vec4 ambient_color = vec4(0.1750, 0.1750, 0.1750, 1.0);
 
     vec3 point1 = normalized_view_dir * t + camera_pos;
-    vec3 sphere_normal_p1 = normalize(point1 - sphere_center); // sphere normal
+    // vec3 sphere_normal_p1 = normalize(point1 - sphere_center); // sphere normal
+
+    vec3 sphere_normal_p1;
+    surfaceNormal(t, camera_pos + t * normalized_view_dir, sphere_normal_p1, sphere_center);
+
+
 
     // light
     vec3 light_pos = vec3(2.0, 2.0, 2.0);
@@ -194,6 +219,8 @@ void main ()
     vec3 normalized_light_dir = normalize(light_dir);
     vec3 camera_light_dir = normalize(camera_pos - point1);
     float diffuse_k = clamp( dot(normalized_light_dir, sphere_normal_p1), 0.0, 1.0 );
+    vec3 diff_k = vec3(diffuse_k, diffuse_k, diffuse_k);
+    // float diffuse_k = clamp( dot(normalized_light_dir, sphere_normal_p1), 0.0, 1.0 );
 
     // specular
     float scalar = 2.0 * ( dot(light_dir, sphere_normal_p1) );
@@ -204,7 +231,6 @@ void main ()
     // 1 - 200  larger - smaller
     vec4 specular_color = pow(specular_k, 70.0) * vec4(1.0, 1.0, 1.0, 1.0);
 
-    /*
     // relection
     vec3 relection_ray = normalized_view_dir - 2.0 * (dot(normalized_view_dir, sphere_normal_p1)) * sphere_normal_p1;
     vec4 relection;
@@ -231,8 +257,10 @@ void main ()
 
     vec4 refraction_color;
     computeColor(point3, normalize(point3_dir), refraction_color); // second sphere intersection
-*/
-    gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0); 
+
+
+    // gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
+    gl_FragColor = vec4(diff_k, 1.0);
   }
 
 }
