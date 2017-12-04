@@ -108,8 +108,23 @@ void blob(in vec3 p, in float theta, out float d, out float maxDisplacement, in 
   float a = 2.0;
   float b = 1.0;
 
-  float dr1 = a * exp(-b * pow(p_to_1, 2.0));
-  float dr2 = a * exp(-b * pow(p_to_2, 2.0));
+  float dr1;
+  float dr2;
+
+  if ( 0.0 <= p_to_1 && p_to_1 <= b/3.0) {
+    dr1 = a * (1.0 - (3.0 * p_to_1) / pow(b, 2.0) );
+  } else if (b/3.0 <= p_to_1 && p_to_1 <= b) {
+    dr1 = 3.0 * a/2.0 * pow((1.0 - p_to_1/b), 2.2);
+  }
+
+  if ( 0.0 <= p_to_2 && p_to_2 <= b/3.0) {
+    dr2 = a * (1.0 - (3.0 * p_to_2) / pow(b, 2.2));
+  } else if (b/3.0 <= p_to_2 && p_to_2 <= b) {
+    dr2 = 3.0 * a/2.0 * pow((1.0 - p_to_1/b), 2.2);
+  }
+
+  // float dr1 = a * exp(-b * pow(p_to_1, 2.0));
+  // float dr2 = a * exp(-b * pow(p_to_2, 2.0));
 
   d = dr1 + dr2;
   // d = dr1 + dr2;
