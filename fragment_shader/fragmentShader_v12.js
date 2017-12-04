@@ -112,8 +112,9 @@ void blob(in vec3 p, in float theta, out float d, out float maxDisplacement, in 
   float dr2 = a * exp(-b * pow(p_to_2, 2.0));
 
   d = dr1 + dr2;
+  // d = dr1 + dr2;
 
-  maxDisplacement = 0.2 * 2.0;
+  maxDisplacement = 10.2 * 13.0;
 }
 
 void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_center, in float radius, in float theta,
@@ -130,7 +131,7 @@ void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_cente
     // deform2(surfacep, theta, offset, maxDisplacement);
     blob(p, theta, offset, maxDisplacement, sphere_center);
     surfaceDistance = radius + offset;
-    if (offset < 0.02) {
+    if (offset > 1.750) {
         t = d;
         return;
     }
@@ -244,7 +245,7 @@ void main ()
     computeColor(point3, normalize(point3_dir), refraction_color); // second sphere intersection
 */
     float frac = (distanceFromCenter - radius)/maxDisplacement;
-    vec4 color = frac * vec4(1.0, 1.0, 1.0, 1.0) + (1.0-frac)*vec4(0.25, 0.6, 0.7, 1.0);
+    vec4 color = frac * vec4(1.0, 1.0, 1.0, 1.0) + vec4(0.25, 0.6, 0.7, 1.0);
     gl_FragColor = color; //diffuse_k * vec4(0.36, 0.40, 0.650, 1.0) +specular_color + refraction_color;
   }
 
