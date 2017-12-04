@@ -96,23 +96,6 @@ void surfaceNormal(in float distance, in vec3 p, out vec3 n)
 {
 }
 
-void blobTest(in float r, out float d, out int intersect)
-{
-    float a = 2.0 /2.0;
-    float b = 1.0 /2.0;
-
-    intersect = 0;
-    d = 0.0;
-    if (r < b) {
-        if ( 0.0 <= r && r <= b/3.0) {
-          d = a * (1.0 - 3.0 * r / pow(b, 2.0) );
-        } /*else if (b/3.0 <= r && r <= b) {
-          d = 3.0 * a/2.0 * pow(1.0 - r/b, 2.0);
-        }*/
-        intersect = 1;
-    }
-}
-
 void blob(in vec3 p, in float theta, out float d, in vec3 sphere_center)
 {
   vec3 sphere_1_pos = vec3(cos(theta), sin(theta), 0.0) + sphere_center;
@@ -121,26 +104,12 @@ void blob(in vec3 p, in float theta, out float d, in vec3 sphere_center)
   float p_to_1 = length(sphere_1_pos - p);
   float p_to_2 = length(sphere_2_pos - p);
 
-  float sum = 0.0;
-  //int intersects = 0; 
-  //int result;
-  //float dr1, dr2;
-  //blobTest(p_to_1, dr1, result);
-
-  //intersects += result;
-  //sum += dr1;
-  //blobTest(p_to_2, dr2, result);
-  //intersects += result;
-  //sum += dr2;
-
   float a = 2.0 / 2.0;
   float b = 1.0 / 2.0;
 
   float dr1 = a * exp(-b * 100.0 * pow(p_to_1, 2.0));
   float dr2 = a * exp(-b * 100.0 * pow(p_to_2, 2.0));
 
-  d = 999999.0;
-  //if (intersects > 0) d = dr1 + dr2;
   d = 2.0 - (dr2 + dr1);
 }
 
