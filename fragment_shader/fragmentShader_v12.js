@@ -1,4 +1,4 @@
-var fragmentProgram =
+var fragmentProgram =`
 // relection
 #ifdef GL_ES
   precision mediump float;
@@ -6,6 +6,8 @@ var fragmentProgram =
 
 varying vec4 v_pos;
 uniform float theta;
+
+
 
 void planeIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 box_normal, in vec3 box_p1,
   out float plane_intersect)
@@ -94,6 +96,20 @@ void surfaceNormal(in float distance, in vec3 p, out vec3 n)
 {
 }
 
+void blob(in vec3 p, in float theta, out float d, out float maxDisplacement, in vec3 sphere_center)
+{
+  vec3 sphere_1_pos = vec3(cos(theta), sin(theta), 0.0) + sphere_center;
+  vec3 sphere_2_pos = vec3(cos(-theta), sin(-theta), 0.0) + sphere_center;
+
+  float offset = (1.0 + cos(theta)) * 3.14 * 4.0;
+  float p_to_1 = length(sphere_1_pos - p);
+  float p_to_2 = length(sphere_2_pos - p);
+
+  d = min(p_to_2, p_to_1);
+
+  maxDisplacement = 0.2 * 2.0;
+}
+
 void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_center, in float radius, in float theta,
         out float t, out float surfaceDistance, out float maxDisplacement)
 {
@@ -105,9 +121,10 @@ void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_cente
     n = n / distance;
     vec3 surfacep = sphere_center + radius * n;
     float offset;
-    deform2(surfacep, theta, offset, maxDisplacement);
+    // deform2(surfacep, theta, offset, maxDisplacement);
+    blob(p, theta, offset, maxDisplacement, sphere_center);
     surfaceDistance = radius + offset;
-    if (distance < surfaceDistance) {
+    if (offset < 0.2) {
         t = d;
         return;
     }
@@ -134,17 +151,19 @@ void refractionDirection(in float refraction_coef, in vec3 input_dir, in vec3 no
 
 void main ()
 {
+
+
   vec3 camera_pos = vec3(0.0, 0.0, 0.0);
   vec3 sphere_center = vec3(0.0, 0.0, -2.0);
-  float radius = 1.0;
+  float radius = 0.10;
   float maxDisplacement = 0.2;
 
   vec3 view_dir = v_pos.xyz - camera_pos;
   vec3 normalized_view_dir = normalize(view_dir);
 
   // rotate camera by 45
-  float angle1 = theta;
-  float angle2 = -3.14/8.0;
+  float angle1 = 0.0;
+  float angle2 = 0.0;
   // first 3 vars = first column
   mat3 m = mat3(
     cos(angle1), 0, sin(angle1), // first column
@@ -224,4 +243,4 @@ void main ()
   }
 
 }
-;
+`;
