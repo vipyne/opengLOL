@@ -105,7 +105,13 @@ void blob(in vec3 p, in float theta, out float d, out float maxDisplacement, in 
   float p_to_1 = length(sphere_1_pos - p);
   float p_to_2 = length(sphere_2_pos - p);
 
-  d = min(p_to_2, p_to_1);
+  float a = 2.0;
+  float b = 1.0;
+
+  float dr1 = a * exp(-b * pow(p_to_1, 2.0));
+  float dr2 = a * exp(-b * pow(p_to_2, 2.0));
+
+  d = dr1 + dr2;
 
   maxDisplacement = 0.2 * 2.0;
 }
@@ -124,7 +130,7 @@ void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_cente
     // deform2(surfacep, theta, offset, maxDisplacement);
     blob(p, theta, offset, maxDisplacement, sphere_center);
     surfaceDistance = radius + offset;
-    if (offset < 0.2) {
+    if (offset < 0.02) {
         t = d;
         return;
     }
