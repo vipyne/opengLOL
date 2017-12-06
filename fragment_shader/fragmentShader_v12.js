@@ -94,28 +94,35 @@ void surfaceNormal(in float r, in vec3 p, out vec3 n, in vec3 sphere_center)
 {
   vec3 sphere_1_pos = vec3(cos(theta), sin(theta), 0.0) + sphere_center;
   vec3 sphere_2_pos = vec3(cos(-theta), sin(-theta), 0.0) + sphere_center;
-  float p_to_1 = length(sphere_1_pos - p);
-  float p_to_2 = length(sphere_2_pos - p);
 
-  float a = 2.0 / 2.0;
-  float b = 1.0 / 2.0;
+  vec3 p1 = sphere_1_pos - p;
+  vec3 p2 = sphere_2_pos - p;
+  float p_to_1 = length(p1);
+  float p_to_2 = length(p2);
 
-  float dr1 = a * exp(-b * 100.0 * pow(p_to_1, 2.0));
-  float dr2 = a * exp(-b * 100.0 * pow(p_to_2, 2.0));
+  float a = 1.0;
+  float b = 0.5 * 100.0;
 
-  vec3 normal;
+  float tmp = (log(0.01) - log(a))/(-b);
+  float rr = sqrt(tmp);
 
-  if (dr1 < 0.01) {
-    vec3 norm1 = normalize(sphere_1_pos - p);
-    normal += norm1;
+  vec3 normal = vec3(0.0,0.0,0.0);
+
+  float threshold = 0.00;
+  float dr1 = a * exp(-b * pow(p_to_1, 2.0));
+  if (dr1 > threshold) {
+      vec3 norm1 = -2.0 * b * dr1 * p1;
+      normal += norm1;
   }
-  if (dr2 < 0.01){
-    vec3 norm2 = normalize(sphere_2_pos - p);
-    normal += norm2;
+
+  float dr2 = a * exp(-b * pow(p_to_2, 2.0));
+  if (dr2 > threshold) {
+      vec3 norm2 = -2.0 * b * dr2 * p2;
+      normal += norm2;
   }
 
   n = normalize(normal);
-  // n = -2.0 * a * b * r * exp(-b * pow(r, 2.0));
+  // n = -2.0 * a * b * p * exp(-b * pow(r, 2.0));
 }
 
 void blob(in vec3 p, in float theta, out float d, in vec3 sphere_center)
@@ -132,7 +139,7 @@ void blob(in vec3 p, in float theta, out float d, in vec3 sphere_center)
   float dr1 = a * exp(-b * 100.0 * pow(p_to_1, 2.0));
   float dr2 = a * exp(-b * 100.0 * pow(p_to_2, 2.0));
 
-  d = 2.0 - (dr2 + dr1);
+  d = dr2 + dr1;
 }
 
 void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_center, in float radius, in float theta, out float t)
@@ -142,7 +149,7 @@ void sphereIntersection(in vec3 ray_start, in vec3 ray_dir, in vec3 sphere_cente
     vec3 p = ray_start + d * ray_dir;
     float distance = 0.0;
     blob(p, theta, distance, sphere_center);
-    if (distance < 1.95) {
+    if (distance > 0.01) {
         t = d;
         return;
     }
@@ -219,7 +226,7 @@ void main ()
     vec3 normalized_light_dir = normalize(light_dir);
     vec3 camera_light_dir = normalize(camera_pos - point1);
     float diffuse_k = clamp( dot(normalized_light_dir, sphere_normal_p1), 0.0, 1.0 );
-    vec3 diff_k = vec3(diffuse_k, diffuse_k, diffuse_k);
+    vec3 diffuse_color = diffuse_k * vec3(1.0, 1.0, 1.0);
     // float diffuse_k = clamp( dot(normalized_light_dir, sphere_normal_p1), 0.0, 1.0 );
 
     // specular
@@ -229,7 +236,7 @@ void main ()
     vec3 normalized_half_angle = half_angle / length(half_angle); // implentation detail
     float specular_k = clamp( dot( normalized_half_angle, -normalized_view_dir ), 0.0, 1.0 );
     // 1 - 200  larger - smaller
-    vec4 specular_color = pow(specular_k, 70.0) * vec4(1.0, 1.0, 1.0, 1.0);
+    vec4 specular_color = pow(specular_k, 70.0) * vec4(1.0, 1.0, 1.0, 0.0);
 
     // relection
     vec3 relection_ray = normalized_view_dir - 2.0 * (dot(normalized_view_dir, sphere_normal_p1)) * sphere_normal_p1;
@@ -258,9 +265,8 @@ void main ()
     vec4 refraction_color;
     computeColor(point3, normalize(point3_dir), refraction_color); // second sphere intersection
 
-
     // gl_FragColor = vec4(1.0, 1.0, 0.0, 1.0);
-    gl_FragColor = vec4(diff_k, 1.0);
+    gl_FragColor = vec4(diffuse_color, 0.0) + specular_color + vec4(0.5 * relection.xyz, 1.0); 
   }
 
 }
